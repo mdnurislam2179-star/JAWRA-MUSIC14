@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="bn"><link rel="manifest" href="./manifest.json">
+
+<meta name="theme-color" content="#">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#050505">
+<title>JAWRA MUSIC</title>
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0;width:100%;min-height:100%;background:#050505;color:#fff;font-family:Arial,Helvetica,sans-serif;overscroll-behavior-x:none}
+body{overflow-x:hidden;-webkit-text-size-adjust:100%}
+button,input{font:inherit}button{border:0;cursor:pointer}input{outline:none}
+img{-webkit-user-drag:none;user-select:none}
+:root{--gold:#d4af37;--panel:#151515;--line:#292929}
+#splash{position:fixed;inset:0;background:#000;z-index:999999;display:flex;align-items:center;justify-content:center;animation:splashOut .8s ease forwards;animation-delay:2s}
+#splash img{width:145px;height:145px;object-fit:cover;border-radius:50%;box-shadow:0 0 20px #d4af3766,0 0 55px #d4af3740;animation:pulse 1.2s infinite alternate}
+@keyframes pulse{from{transform:scale(.94);opacity:.8}to{transform:scale(1);opacity:1}}
+@keyframes splashOut{to{opacity:0;visibility:hidden;pointer-events:none}}
+#app{min-height:100vh;padding-bottom:75px}
+.home-header{position:sticky;top:0;z-index:4000;min-height:74px;background:#050505;display:flex;align-items:center;gap:9px;padding:10px 12px;border-bottom:1px solid #181818}
+.logo{font-size:19px;font-weight:900;white-space:nowrap}
+.home-search{flex:1;height:47px;display:flex;align-items:center;background:var(--panel);border:1px solid #333;border-radius:25px;overflow:hidden;min-width:0}
+.home-search input{flex:1;width:100%;height:100%;min-width:0;border:0;background:transparent;color:#fff;padding:0 15px;font-size:16px}
+.home-search input::placeholder{color:#aaa}
+.home-search button{width:48px;height:100%;background:#222;color:#fff;font-size:24px}
+.home-voice,.home-demon{width:43px;height:43px;flex:none;border-radius:50%;background:#181818;border:1px solid #383838;color:#fff;font-size:21px;display:flex;align-items:center;justify-content:center}
+.home-voice svg,.search-screen-voice svg{display:block}
+.home-voice.listening,.search-screen-voice.listening{background:var(--gold);color:#000;animation:voicePulse .9s infinite alternate}
+@keyframes voicePulse{to{transform:scale(1.08)}}
+.categories{display:flex;gap:9px;padding:12px 14px;overflow-x:auto;scrollbar-width:none}
+.categories::-webkit-scrollbar{display:none}
+.category{flex:none;padding:9px 17px;border-radius:20px;color:#ddd;background:#181818;border:1px solid #292929}
+.category.active{background:var(--gold);color:#000;border-color:var(--gold);font-weight:bold}
+.video-card{width:100%;background:#080808;margin:0 0 17px;overflow:hidden;cursor:pointer}
+.thumb-wrap{width:100%;aspect-ratio:16/9;position:relative;overflow:hidden;background:#111}
+.thumb-wrap img{width:100%;height:100%;display:block;object-fit:cover}
+.video-info{display:flex;gap:11px;padding:11px 14px 12px}
+.channel-avatar{width:43px;height:43px;flex:none;border-radius:50%;object-fit:cover;background:#222}
+.video-text{min-width:0;flex:1}
+.video-title{font-size:16px;line-height:1.35;font-weight:600;color:#eee;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.video-meta{margin-top:7px;color:#999;font-size:13px}
+.loader{text-align:center;padding:25px;color:#aaa}
+.error{margin:20px;padding:20px;border:1px solid #492020;border-radius:12px;color:#ffb0b0;background:#180909;line-height:1.55;overflow-wrap:anywhere}
+#playerPage{display:none;min-height:100vh;background:#050505;padding-bottom:30px}
+.player-header{position:sticky;top:0;z-index:7000;height:52px;display:flex;align-items:center;justify-content:space-between;background:#050505;border-bottom:1px solid #252525}
+.player-left{display:flex;align-items:center;min-width:0}
+.player-back{width:50px;height:52px;background:transparent;color:#fff;font-size:36px}
+.player-name{font-weight:800;white-space:nowrap}
+.player-actions{display:flex;align-items:center;gap:4px}
+.player-actions button{width:43px;height:43px;background:transparent;color:#fff;font-size:20px}
+.player-demon-btn{font-size:22px!important}
+#playerSearchPanel{display:none;position:absolute;left:0;right:0;top:52px;padding:10px 12px;background:#080808;border-bottom:1px solid #333;z-index:8000}
+.player-search-box{height:46px;display:flex;background:#171717;border:1px solid #3a3a3a;border-radius:24px;overflow:hidden}
+.player-search-box input{flex:1;min-width:0;border:0;background:transparent;color:#fff;padding:0 15px}
+.player-search-box button{width:50px;background:var(--gold);color:#000;font-size:20px}
+#fullFrameHost{width:100%;background:#000;position:sticky;top:52px;z-index:5000;border:2px solid var(--gold);overflow:hidden;box-shadow:0 7px 28px #d4af3733;display:block}
+#youtubeFrame{width:100%;aspect-ratio:16/9;height:auto;display:block;border:0;background:#000}
+#swipeDownHandle{position:absolute;z-index:5001;left:0;right:0;top:0;height:28px;background:transparent;touch-action:pan-y}
+#fullFrameHost:fullscreen #swipeDownHandle,#fullFrameHost:-webkit-full-screen #swipeDownHandle{display:none}
+#landscapeRelated{display:none;width:29%;height:100%;overflow-y:auto;background:#090909;flex:none}
+.landscape-title{padding:12px;font-weight:bold;border-bottom:1px solid #252525}
+.landscape-card{padding:7px;display:flex;gap:7px;border-bottom:1px solid #222;cursor:pointer}
+.landscape-card img{width:105px;height:60px;object-fit:cover;border-radius:4px;flex:none}
+.landscape-card div{font-size:12px;line-height:1.3}
+#fullFrameHost:fullscreen,#fullFrameHost:-webkit-full-screen{position:fixed;inset:0;z-index:999999;width:100vw;height:100vh;border:0;box-shadow:none;display:flex;flex-direction:row;background:#000}
+#fullFrameHost:fullscreen #youtubeFrame,#fullFrameHost:-webkit-full-screen #youtubeFrame{width:71%;height:100%;aspect-ratio:auto;flex-shrink:0}
+#fullFrameHost:fullscreen #landscapeRelated,#fullFrameHost:-webkit-full-screen #landscapeRelated{display:block}
+.related{padding:18px 0 40px}
+.related-head{display:flex;align-items:center;justify-content:space-between;padding:0 14px 12px}
+.related-title{font-size:19px;font-weight:800}
+.related-clear{background:#181818;border:1px solid #333;color:#ddd;padding:7px 12px;border-radius:16px;font-size:12px}
+.related .video-card{margin-bottom:13px}
+.related .video-info{padding-top:9px}
+#miniPlayer{display:none;position:fixed;left:8px;bottom:74px;width:58vw;max-width:225px;height:clamp(105px,31vw,132px);z-index:9500;background:#111;border:1px solid #ffffff25;border-radius:11px;overflow:hidden;box-shadow:0 6px 24px #000b;touch-action:pan-y}
+#miniThumb{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.55;filter:brightness(.8)}
+.mini-info{position:absolute;left:8px;right:8px;bottom:7px;z-index:2;pointer-events:none}
+#miniTitle{color:#fff;font-size:11px;font-weight:700;line-height:1.25;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;text-shadow:0 2px 5px #000;background:linear-gradient(transparent,#000c);padding:15px 3px 2px}
+.mini-button{position:absolute;z-index:3;width:32px;height:32px;border-radius:50%;color:#fff;background:#0009;border:1px solid #ffffff35;font-size:19px}
+#miniOpen{left:6px;top:6px}
+#miniClose{right:6px;top:6px;font-size:22px}
+#miniPlayer:after{content:"";position:absolute;left:0;right:0;bottom:0;height:3px;background:#ff1744}
+#playerPage.mini-hidden{display:block!important;position:fixed!important;left:-120vw!important;top:0!important;width:100vw!important;height:1px!important;overflow:hidden!important;opacity:0!important;pointer-events:none!important}
+.bottom-nav{position:fixed;left:0;right:0;bottom:0;height:64px;background:#080808f7;border-top:1px solid #292929;z-index:9000;display:flex;align-items:center;justify-content:space-around}
+.nav-btn{flex:1;height:100%;color:#aaa;background:transparent;font-size:11px}
+.nav-btn span{display:block;font-size:23px;margin-bottom:3px}
+.nav-btn.active{color:#fff}
+#searchScreen{display:none;position:fixed;inset:0;z-index:9800;background:#090909;overflow-y:auto;padding-bottom:24px}
+.search-top{height:66px;display:flex;align-items:center;gap:12px;padding:8px 14px;background:#090909;position:sticky;top:0;z-index:2}
+.search-back{width:36px;height:44px;background:transparent;color:#fff;font-size:38px;line-height:1}
+.search-screen-box{height:48px;flex:1;display:flex;align-items:center;border-radius:28px;background:#252525;overflow:hidden;min-width:0}
+.search-screen-box input{flex:1;min-width:0;width:100%;height:100%;border:0;background:transparent;color:#fff;padding:0 16px;font-size:17px}
+.search-screen-box input::placeholder{color:#bbb;font-style:italic}
+.search-screen-voice{width:48px;height:48px;border-radius:50%;background:#252525;color:#fff;font-size:23px;flex:none;display:flex;align-items:center;justify-content:center}
+#recentSearches{padding:12px 0}
+.recent-row{min-height:73px;display:flex;align-items:center;gap:18px;padding:8px 18px;color:#eee}
+.recent-clock{width:28px;flex:none;color:#eee;font-size:29px}
+.recent-query{flex:1;min-width:0;font-size:18px;line-height:1.3;overflow-wrap:anywhere}
+.recent-fill{width:28px;flex:none;text-align:center;font-size:30px;color:#ddd;background:transparent}
+.recent-empty{text-align:center;color:#aaa;padding:35px 20px;line-height:1.6}
+.quota-card{margin:22px 16px;padding:24px 20px;border-radius:22px;background:linear-gradient(145deg,#17130a,#101010 55%,#211805);border:1px solid #d4af3780;box-shadow:0 12px 40px #0008,inset 0 0 25px #d4af3710;text-align:center}
+.quota-icon{font-size:38px;margin-bottom:10px}
+.quota-card h2{margin:6px 0 10px;color:#f1d77c;font-size:22px}
+.quota-card p{color:#ddd;line-height:1.6;margin:8px 0}
+.quota-time{font-size:19px;color:#ffe7a0;font-weight:bold;margin:14px 0}
+.quota-note{font-size:12px;color:#aaa!important}
+.quota-btn{padding:11px 18px;border-radius:22px;background:#d4af37;color:#080808;font-weight:bold;margin-top:10px}
+@media(max-width:700px){.home-header{padding:10px;gap:7px}.logo{display:none}.home-search{height:47px}.home-voice,.home-demon{width:42px;height:42px}#miniPlayer{left:8px;bottom:72px;width:58vw;height:clamp(100px,29vw,126px)}}
+</style>
+</head>
+<body>
+
+<div id="splash"><img src="https://i.ibb.co.com/r2cGS8H4/1000012185.jpg" alt="JAWRA MUSIC"></div>
+
+<div id="app">
+<header class="home-header">
+<div class="logo">JAWRA MUSIC</div>
+<div class="home-search"><input id="homeSearchInput" type="search" placeholder="Search music..." autocomplete="off" readonly><button id="homeSearchBtn" aria-label="Search">⌕</button></div>
+<button class="home-voice" id="homeVoiceBtn" title="Voice Search" aria-label="Voice Search"><svg viewBox="0 0 24 24" width="27" height="27"><rect x="9" y="3" width="6" height="12" rx="3" fill="none" stroke="currentColor" stroke-width="2"/><path d="M5.5 11.5a6.5 6.5 0 0 0 13 0M12 18v3m-4 0h8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
+<button class="home-demon" id="homeDemon" title="Mini background player">😈</button>
+</header>
+
+<div class="categories">
+<button class="category active" data-query="trending music">Trending</button>
+<button class="category" data-query="Bangla music">Bangla</button>
+<button class="category" data-query="Hindi music">Hindi</button>
+<button class="category" data-query="English music">English</button>
+<button class="category" data-query="lofi music">Lofi</button>
+<button class="category" data-query="remix music">Remix</button>
+</div>
+<main id="homeResults"></main>
+<div id="homeLoader" class="loader">Loading...</div>
+</div>
+
+<section id="playerPage">
+<header class="player-header">
+<div class="player-left"><button class="player-back" id="playerBack">‹</button><div class="player-name">JAWRA MUSIC</div></div>
+<div class="player-actions"><button id="playerSearchBtn" title="Search">⌕</button><button id="playerRotateBtn" title="Fullscreen">⛶</button><button class="player-demon-btn" id="playerDemonBtn">😈</button></div>
+<div id="playerSearchPanel"><div class="player-search-box"><input id="playerSearchInput" type="search" placeholder="Search another song..." autocomplete="off"><button id="playerSearchGo">⌕</button></div></div>
+</header>
+<div id="fullFrameHost">
+<div id="swipeDownHandle" aria-label="Swipe down to mini player"></div>
+<iframe id="youtubeFrame" title="JAWRA MUSIC Player" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe>
+<div id="landscapeRelated"><div class="landscape-title">Related Music</div><div id="landscapeResults"></div></div>
+</div>
+<section class="related"><div class="related-head"><div class="related-title">Related Music</div><button class="related-clear" id="relatedClear">Refresh</button></div><div id="relatedResults"></div></section>
+</section>
+
+<div id="miniPlayer">
+<img id="miniThumb" src="" alt="">
+<div class="mini-info"><div id="miniTitle">Playing...</div></div>
+<button class="mini-button" id="miniOpen" aria-label="Open player">Ⅱ</button>
+<button class="mini-button" id="miniClose" aria-label="Close player">×</button>
+</div>
+
+<nav class="bottom-nav">
+<button class="nav-btn active" id="navHome"><span>⌂</span>Home</button>
+<button class="nav-btn" id="navSearch"><span>⌕</span>Search</button>
+<button class="nav-btn" id="navPlayer"><span>▶</span>Player</button>
+</nav>
+
+<div id="searchScreen" aria-hidden="true">
+<div class="search-top">
+<button class="search-back" id="searchBack" aria-label="Back">‹</button>
+<div class="search-screen-box">
+<input id="searchScreenInput" type="search" placeholder="Search YouTube" autocomplete="off">
+<button id="searchScreenGo" style="display:none">⌕</button>
+</div>
+<button class="search-screen-voice" id="searchVoiceBtn" aria-label="Voice search">
+<svg viewBox="0 0 24 24" width="29" height="29"><rect x="9" y="3" width="6" height="12" rx="3" fill="none" stroke="currentColor" stroke-width="2"/><path d="M5.5 11.5a6.5 6.5 0 0 0 13 0M12 18v3m-4 0h8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+</button>
+</div>
+<div id="recentSearches"></div>
+</div>
+
+<script>
+/* STEP 1: এখানে নিজের YouTube Data API v3 key বসাও */
+const API_KEY="YOUR_YOUTUBE_API_KEY_HERE";
+const API_URL="https://www.googleapis.com/youtube/v3/search";
+const $=id=>document.getElementById(id);
+
+const app=$("app"),playerPage=$("playerPage"),homeResults=$("homeResults"),homeLoader=$("homeLoader");
+const homeSearchInput=$("homeSearchInput"),homeSearchBtn=$("homeSearchBtn"),homeVoiceBtn=$("homeVoiceBtn"),homeDemon=$("homeDemon");
+const playerBack=$("playerBack"),playerSearchBtn=$("playerSearchBtn"),playerRotateBtn=$("playerRotateBtn"),playerDemonBtn=$("playerDemonBtn");
+const playerSearchPanel=$("playerSearchPanel"),playerSearchInput=$("playerSearchInput"),playerSearchGo=$("playerSearchGo");
+const fullFrameHost=$("fullFrameHost"),youtubeFrame=$("youtubeFrame"),relatedResults=$("relatedResults"),landscapeResults=$("landscapeResults"),relatedClear=$("relatedClear");
+const miniPlayer=$("miniPlayer"),miniThumb=$("miniThumb"),miniTitle=$("miniTitle"),miniOpen=$("miniOpen"),miniClose=$("miniClose");
+const navHome=$("navHome"),navSearch=$("navSearch"),navPlayer=$("navPlayer");
+const searchScreen=$("searchScreen"),searchScreenInput=$("searchScreenInput"),searchVoiceBtn=$("searchVoiceBtn"),recentSearches=$("recentSearches");
+
+let historyState="home",swipeStartY=0,swipeStartX=0,swipeTracking=false;
+let currentVideoId="",currentVideoTitle="",currentVideoThumb="",currentRelatedItems=[];
+let homeNextPageToken="",homeCurrentQuery="trending music",homeLoading=false;
+let isMiniMode=false,playbackActive=false,wakeLock=null,recognition=null,quotaBlockedUntil=0;
+
+const SEARCH_HISTORY_KEY="jawra_recent_searches_v2";
+const SEARCH_CACHE_KEY="jawra_search_cache_v2";
+const RELATED_CACHE_PREFIX="jawra_related_v3_";
+
+function hasApiKey(){return API_KEY&&API_KEY!=="AIzaSyByuQ_hrEaCvAUoqdIkGyzMDWMTlzZ0zGo"}
+function escapeHTML(v){return String(v||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;")}
+function readHistory(){try{return JSON.parse(localStorage.getItem(SEARCH_HISTORY_KEY)||"[]")}catch(e){return []}}
+function saveHistory(q){
+q=String(q||"").trim();if(!q)return;
+const h=readHistory().filter(x=>x.query.toLowerCase()!==q.toLowerCase());
+h.unshift({query:q,time:Date.now()});
+try{localStorage.setItem(SEARCH_HISTORY_KEY,JSON.stringify(h.slice(0,40)))}catch(e){}
+}
+function cachedSearchKey(q,page=""){return SEARCH_CACHE_KEY+"_"+q.trim().toLowerCase()+"_"+(page||"first")}
+function readSearchCache(q,page=""){
+try{const x=JSON.parse(sessionStorage.getItem(cachedSearchKey(q,page))||"null");if(x&&Date.now()-x.time<30*60*1000)return x.data}catch(e){}
+return null;
+}
+function writeSearchCache(q,page,data){try{sessionStorage.setItem(cachedSearchKey(q,page),JSON.stringify({time:Date.now(),data}))}catch(e){}}
+
+function nextPacificMidnight(){
+const now=Date.now();
+const fmt=new Intl.DateTimeFormat("en-US",{timeZone:"America/Los_Angeles",year:"numeric",month:"2-digit",day:"2-digit"});
+const day=fmt.format(new Date(now));let t=now+60000;
+for(let i=0;i<27*60;i++,t+=60000){if(fmt.format(new Date(t))!==day)return t}
+return now+86400000;
+}
+function formatLocalTime(t){return new Intl.DateTimeFormat("bn-BD",{timeZone:"Asia/Dhaka",weekday:"short",day:"numeric",month:"short",hour:"numeric",minute:"2-digit",hour12:true}).format(new Date(t))}
+function isQuotaError(e){return /quotaExceeded|dailyLimitExceeded|dailyLimitExceededUnreg|quota.*exceeded|exceeded your quota/i.test((e&&e.message)||"")}
+
+function showQuotaMessage(){
+const reset=quotaBlockedUntil||nextPacificMidnight();quotaBlockedUntil=reset;
+homeResults.innerHTML=`<section class="quota-card"><div class="quota-icon">✦</div><h2>আজকের Music Search Limit শেষ</h2><p>JAWRA MUSIC-এর YouTube API দৈনিক কোটা আপাতত শেষ হয়েছে। কোটা আবার চালু হলে সার্চ করতে পারবে।</p><div class="quota-time">আবার চেষ্টা করো: ${escapeHTML(formatLocalTime(reset))}</div><p id="quotaCountdown"></p><p class="quota-note">সময়টি YouTube-এর Pacific Time দৈনিক রিসেট ধরে আনুমানিক দেখানো হচ্ছে। Google Cloud-এর সীমা আলাদা হলে সময় বদলাতে পারে।</p><button class="quota-btn" id="quotaRetry">আবার চেষ্টা</button></section>`;
+homeLoader.textContent="";
+$("quotaRetry").onclick=()=>{if(Date.now()<reset)showQuotaMessage();else{quotaBlockedUntil=0;searchHome(homeCurrentQuery,false)}};
+const mins=Math.max(0,Math.ceil((reset-Date.now())/60000));
+$("quotaCountdown").textContent=mins?`আর প্রায় ${Math.floor(mins/60)} ঘণ্টা ${mins%60} মিনিট বাকি।`:"কোটা রিসেট হওয়ার সময় হয়েছে—আবার চেষ্টা করো।";
+}
+
+async function youtubeSearch(query,maxResults=10,pageToken=""){
+if(!hasApiKey())throw new Error("YouTube API key বসানো হয়নি।");
+if(Date.now()<quotaBlockedUntil)throw new Error("LOCAL_QUOTA_WAIT");
+const cached=readSearchCache(query,pageToken);if(cached)return cached;
+let url=API_URL+"?part=snippet&type=video&maxResults="+maxResults+"&q="+encodeURIComponent(query)+"&regionCode=BD&safeSearch=moderate&key="+encodeURIComponent(API_KEY);
+if(pageToken)url+="&pageToken="+encodeURIComponent(pageToken);
+const response=await fetch(url);let data={};try{data=await response.json()}catch(e){}
+if(!response.ok){
+const reason=(data.error?.errors||[]).map(x=>x.reason).join(" ");
+const message=reason+" "+(data?.error?.message||"YouTube API error");
+if(isQuotaError({message})){quotaBlockedUntil=nextPacificMidnight();throw new Error("QUOTA_EXHAUSTED: "+message)}
+throw new Error(data?.error?.message||"YouTube API error");
+}
+writeSearchCache(query,pageToken,data);return data;
+}
+
+function shuffle(a){const arr=[...(a||[])];for(let i=arr.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[arr[i],arr[j]]=[arr[j],arr[i]]}return arr}
+function normalizeSongTitle(t){return String(t||"").toLowerCase().replace(/\b(official|video|audio|lyrics?|lyric|4k|hd|full|status|shorts?|song|songs|music)\b/gi," ").replace(/[^\w\u0980-\u09FF]+/g," ").replace(/\s+/g," ").trim()}
+function titleSimilarity(a,b){
+const A=new Set(normalizeSongTitle(a).split(" ").filter(x=>x.length>2));
+const B=new Set(normalizeSongTitle(b).split(" ").filter(x=>x.length>2));
+if(!A.size||!B.size)return 0;let n=0;A.forEach(x=>{if(B.has(x))n++});return n/Math.min(A.size,B.size);
+}
+function isSameSong(t){return titleSimilarity(currentVideoTitle,t)>=.75}
+
+function videoCardHTML(item){
+const id=item.id?.videoId||item.id,s=item.snippet||{};if(!id)return "";
+const title=escapeHTML(s.title||"Untitled");
+const channel=escapeHTML(s.channelTitle||"YouTube");
+const thumb=s.thumbnails?.high?.url||s.thumbnails?.medium?.url||s.thumbnails?.default?.url||"";
+const avatar=s.thumbnails?.default?.url||thumb;
+return `<article class="video-card" data-video-id="${escapeHTML(id)}" data-title="${title}" data-thumb="${escapeHTML(thumb)}"><div class="thumb-wrap"><img src="${escapeHTML(thumb)}" alt="${title}" loading="lazy"></div><div class="video-info"><img class="channel-avatar" src="${escapeHTML(avatar)}" alt="" loading="lazy"><div class="video-text"><div class="video-title">${title}</div><div class="video-meta">${channel}</div></div></div></article>`;
+}
+function renderHome(items,append=false){
+if(!append)homeResults.innerHTML="";
+homeResults.insertAdjacentHTML("beforeend",(items||[]).filter(x=>x.id?.videoId).map(videoCardHTML).join(""));
+}
+
+async function searchHome(query,append=false){
+query=String(query||"").trim();if(!query||homeLoading)return;
+if(Date.now()<quotaBlockedUntil){showQuotaMessage();return}
+if(!append){homeNextPageToken="";homeResults.innerHTML='<div class="loader">Searching...</div>'}
+homeLoading=true;homeLoader.textContent="Loading...";
+try{
+const data=await youtubeSearch(query,10,append?homeNextPageToken:"");
+if(!append)homeResults.innerHTML="";
+renderHome(data.items||[],true);
+homeCurrentQuery=query;homeNextPageToken=data.nextPageToken||"";
+if(!append)saveHistory(query);
+}catch(e){
+if(isQuotaError(e)||e.message==="LOCAL_QUOTA_WAIT")showQuotaMessage();
+else if(!append)homeResults.innerHTML=`<div class="error">${escapeHTML(e.message)}</div>`;
+}finally{
+homeLoading=false;
+if(Date.now()<quotaBlockedUntil)homeLoader.textContent="";
+else homeLoader.textContent=homeNextPageToken?"আরও ভিডিও দেখতে স্ক্রল করো":"";
+}
+}
+
+function getMoodKeyword(title){
+const t=String(title||"").toLowerCase();
+if(/sad|kosto|কষ্ট|দুঃখ|broken|alone|pain|বিরহ/.test(t))return"sad emotional";
+if(/love|romantic|romance|ভালোবাসা|প্রেম/.test(t))return"romantic love";
+if(/lofi|chill|relax|লোফাই/.test(t))return"lofi chill";
+if(/party|dance|dj|remix/.test(t))return"party dance remix";
+if(/happy|fun|হ্যাপি/.test(t))return"happy upbeat";
+if(/islamic|nasheed|হামদ|নাত|devotional/.test(t))return"islamic nasheed";
+return normalizeSongTitle(title)+" similar music";
+}
+function relatedCacheKey(){return RELATED_CACHE_PREFIX+currentVideoId}
+
+async function loadRelatedVideos(){
+if(!currentVideoId)return;
+const key=relatedCacheKey();
+try{const c=sessionStorage.getItem(key);if(c){currentRelatedItems=shuffle(JSON.parse(c));renderRelated(currentRelatedItems);return}}catch(e){}
+relatedResults.innerHTML='<div class="loader">Related music loading...</div>';
+landscapeResults.innerHTML="";
+try{
+const data=await youtubeSearch(getMoodKeyword(currentVideoTitle)+" music mix",10);
+const items=shuffle((data.items||[]).filter(x=>x.id?.videoId&&x.id.videoId!==currentVideoId&&!isSameSong(x.snippet?.title||""))).slice(0,10);
+currentRelatedItems=items;
+try{sessionStorage.setItem(key,JSON.stringify(items))}catch(e){}
+renderRelated(items);
+}catch(e){
+if(isQuotaError(e)||e.message==="LOCAL_QUOTA_WAIT")relatedResults.innerHTML='<div class="error">দৈনিক API কোটা শেষ। পরে আবার চেষ্টা করো।</div>';
+else relatedResults.innerHTML=`<div class="error">Related music পাওয়া যায়নি।<br><br>${escapeHTML(e.message)}</div>`;
+}
+}
+function renderRelated(items){relatedResults.innerHTML=(items||[]).map(videoCardHTML).join("");renderLandscapeRelated(items)}
+function renderLandscapeRelated(items){
+landscapeResults.innerHTML=(items||[]).map(item=>{
+const id=item.id?.videoId;if(!id)return "";
+const title=escapeHTML(item.snippet?.title||"Untitled");
+const thumb=item.snippet?.thumbnails?.medium?.url||item.snippet?.thumbnails?.default?.url||"";
+return `<div class="landscape-card" data-video-id="${escapeHTML(id)}" data-title="${title}" data-thumb="${escapeHTML(thumb)}"><img src="${escapeHTML(thumb)}" alt=""><div>${title}</div></div>`;
+}).join("");
+}
+
+function pushAppState(view){
+historyState=view;
+try{history.pushState({jawra:true,view,stamp:Date.now()},"","#"+view+"-"+Date.now())}catch(e){}
+}
+function openPlayer(id,title,thumb){
+if(!id)return;
+pushAppState("player");
+currentVideoId=id;currentVideoTitle=title||"JAWRA MUSIC";currentVideoThumb=thumb||"";playbackActive=true;
+if(youtubeFrame.dataset.videoId!==id){
+youtubeFrame.src="https://www.youtube-nocookie.com/embed/"+encodeURIComponent(id)+"?autoplay=1&playsinline=1&rel=0&modestbranding=1&enablejsapi=1&origin="+encodeURIComponent(location.origin);
+youtubeFrame.dataset.videoId=id;
+}
+playerPage.classList.remove("mini-hidden");playerPage.style.display="block";app.style.display="none";miniPlayer.style.display="none";isMiniMode=false;playerSearchPanel.style.display="none";
+window.scrollTo({top:0,behavior:"instant"});requestWakeLock();loadRelatedVideos();
+}
+function enterMiniMode(){
+if(!currentVideoId)return;
+exitVideoFullscreen();playbackActive=true;isMiniMode=true;
+playerPage.classList.add("mini-hidden");app.style.display="block";miniPlayer.style.display="flex";
+miniTitle.textContent=currentVideoTitle;miniThumb.src=currentVideoThumb||"";requestWakeLock();
+}
+function reopenMiniPlayer(){
+if(!currentVideoId)return;
+playerPage.classList.remove("mini-hidden");playerPage.style.display="block";app.style.display="none";miniPlayer.style.display="none";isMiniMode=false;requestWakeLock();
+}
+function closePlayback(){
+exitVideoFullscreen();playbackActive=false;isMiniMode=false;youtubeFrame.src="";youtubeFrame.dataset.videoId="";
+currentVideoId=currentVideoTitle=currentVideoThumb="";currentRelatedItems=[];
+playerPage.classList.remove("mini-hidden");playerPage.style.display="none";miniPlayer.style.display="none";app.style.display="block";releaseWakeLock();
+}
+function openPlayerSearch(){if(currentVideoId)enterMiniMode();openSearchScreen()}
+async function searchFromPlayer(){
+const q=playerSearchInput.value.trim();if(!q)return;
+if(currentVideoId)enterMiniMode();
+playerSearchPanel.style.display="none";openSearchScreen(q);await performSearch(q);
+}
+function openSearchScreen(prefill=""){
+pushAppState("search");searchScreen.style.display="block";searchScreen.setAttribute("aria-hidden","false");
+searchScreenInput.value=prefill;renderHistory();setTimeout(()=>searchScreenInput.focus(),100);
+}
+function closeSearchScreen(){searchScreen.style.display="none";searchScreen.setAttribute("aria-hidden","true");historyState=isMiniMode?"mini":(currentVideoId?"player":"home")}
+function renderHistory(){
+const items=readHistory();
+if(!items.length){recentSearches.innerHTML='<div class="recent-empty">তোমার সার্চ করা গান ও শব্দ এখানে দেখা যাবে।<br>সার্চ বক্সে লিখে সার্চ করো অথবা 🎙️ দিয়ে বলো।</div>';return}
+recentSearches.innerHTML=items.map(h=>`<div class="recent-row" data-query="${escapeHTML(h.query)}"><span class="recent-clock">◴</span><div class="recent-query">${escapeHTML(h.query)}</div><button class="recent-fill" aria-label="Use search">↖</button></div>`).join("");
+}
+async function performSearch(query){
+query=String(query||"").trim();if(!query)return;
+searchScreenInput.value=query;closeSearchScreen();homeSearchInput.value=query;homeCurrentQuery=query;
+app.style.display="block";playerPage.style.display="none";miniPlayer.style.display=currentVideoId?"flex":"none";
+await searchHome(query,false);
+navHome.classList.add("active");navSearch.classList.remove("active");navPlayer.classList.remove("active");
+}
+function startVoiceSearch(button,input){
+const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+if(!SR){alert("তোমার browser-এ Voice Search support নেই। Chrome দিয়ে চেষ্টা করো।");return}
+if(recognition){try{recognition.stop()}catch(e){}recognition=null;button.classList.remove("listening");return}
+recognition=new SR();recognition.lang="bn-BD";recognition.interimResults=false;recognition.continuous=false;recognition.maxAlternatives=1;
+recognition.onstart=()=>button.classList.add("listening");
+recognition.onresult=async ev=>{const q=ev.results?.[0]?.[0]?.transcript||"";if(q){input.value=q;await performSearch(q)}};
+recognition.onerror=()=>{};
+recognition.onend=()=>{button.classList.remove("listening");recognition=null};
+try{recognition.start()}catch(e){}
+}
+async function enterVideoFullscreen(){
+try{
+if(document.fullscreenElement||document.webkitFullscreenElement)return;
+if(fullFrameHost.requestFullscreen){try{await fullFrameHost.requestFullscreen({navigationUI:"hide"})}catch(e){await fullFrameHost.requestFullscreen()}}
+else if(fullFrameHost.webkitRequestFullscreen)fullFrameHost.webkitRequestFullscreen();
+if(screen.orientation?.lock){try{await screen.orientation.lock("landscape")}catch(e){}}
+playerRotateBtn.textContent="↙";
+}catch(e){console.log("Fullscreen error",e)}
+}
+async function exitVideoFullscreen(){
+try{if(document.fullscreenElement&&document.exitFullscreen)await document.exitFullscreen();else if(document.webkitFullscreenElement&&document.webkitExitFullscreen)document.webkitExitFullscreen()}catch(e){}
+try{screen.orientation?.unlock?.()}catch(e){}
+playerRotateBtn.textContent="⛶";
+}
+async function requestWakeLock(){
+if(!("wakeLock"in navigator))return;
+try{if(wakeLock)return;wakeLock=await navigator.wakeLock.request("screen");wakeLock.addEventListener("release",()=>wakeLock=null)}catch(e){}
+}
+async function releaseWakeLock(){if(!wakeLock)return;try{await wakeLock.release()}catch(e){}wakeLock=null}
+function handleAppBack(){
+if(document.fullscreenElement||document.webkitFullscreenElement){exitVideoFullscreen();return}
+if(searchScreen.style.display==="block"){closeSearchScreen();return}
+if(playerSearchPanel.style.display==="block"){playerSearchPanel.style.display="none";return}
+if(currentVideoId&&!isMiniMode){enterMiniMode();return}
+if(isMiniMode){closePlayback();return}
+app.style.display="block";playerPage.style.display="none";closeSearchScreen();
+}
+
+document.addEventListener("click",ev=>{
+const card=ev.target.closest(".video-card,.landscape-card");
+if(card){openPlayer(card.dataset.videoId,card.dataset.title,card.dataset.thumb);return}
+const recent=ev.target.closest(".recent-row");
+if(recent)performSearch(recent.dataset.query);
+});
+homeSearchInput.addEventListener("click",()=>{if(currentVideoId&&!isMiniMode)enterMiniMode();openSearchScreen()});
+homeSearchBtn.addEventListener("click",()=>{if(currentVideoId&&!isMiniMode)enterMiniMode();openSearchScreen(homeSearchInput.value)});
+homeVoiceBtn.addEventListener("click",()=>{if(currentVideoId&&!isMiniMode)enterMiniMode();openSearchScreen();startVoiceSearch(searchVoiceBtn,searchScreenInput)});
+searchVoiceBtn.addEventListener("click",()=>startVoiceSearch(searchVoiceBtn,searchScreenInput));
+$("searchScreenGo").addEventListener("click",()=>performSearch(searchScreenInput.value));
+searchScreenInput.addEventListener("keydown",e=>{if(e.key==="Enter")performSearch(searchScreenInput.value)});
+$("searchBack").addEventListener("click",handleAppBack);
+
+document.querySelectorAll(".category").forEach(b=>b.addEventListener("click",()=>{
+document.querySelectorAll(".category").forEach(x=>x.classList.remove("active"));
+b.classList.add("active");const q=b.dataset.query;homeSearchInput.value=q;searchHome(q,false);
+}));
+homeDemon.addEventListener("click",()=>currentVideoId?enterMiniMode():openSearchScreen());
+playerDemonBtn.addEventListener("click",()=>currentVideoId&&enterMiniMode());
+playerSearchBtn.addEventListener("click",openPlayerSearch);
+playerSearchGo.addEventListener("click",searchFromPlayer);
+playerSearchInput.addEventListener("keydown",e=>{if(e.key==="Enter")searchFromPlayer()});
+playerRotateBtn.addEventListener("click",()=>document.fullscreenElement||document.webkitFullscreenElement?exitVideoFullscreen():enterVideoFullscreen());
+playerBack.addEventListener("click",handleAppBack);
+miniOpen.addEventListener("click",reopenMiniPlayer);
+miniClose.addEventListener("click",closePlayback);
+relatedClear.addEventListener("click",async()=>{if(!currentVideoId)return;try{sessionStorage.removeItem(relatedCacheKey())}catch(e){}await loadRelatedVideos()});
+
+navHome.addEventListener("click",()=>{
+if(document.fullscreenElement||document.webkitFullscreenElement)exitVideoFullscreen();
+closeSearchScreen();playerPage.style.display="none";app.style.display="block";playerPage.classList.remove("mini-hidden");
+navHome.classList.add("active");navSearch.classList.remove("active");navPlayer.classList.remove("active");
+});
+navSearch.addEventListener("click",()=>{
+if(currentVideoId&&!isMiniMode)enterMiniMode();
+openSearchScreen();navHome.classList.remove("active");navSearch.classList.add("active");navPlayer.classList.remove("active");
+});
+navPlayer.addEventListener("click",()=>{
+closeSearchScreen();if(currentVideoId)reopenMiniPlayer();
+navHome.classList.remove("active");navSearch.classList.remove("active");navPlayer.classList.add("active");
+});
+
+window.addEventListener("scroll",()=>{
+if(homeLoading||!homeNextPageToken||searchScreen.style.display==="block")return;
+if(window.innerHeight+window.scrollY>=document.body.offsetHeight-900)searchHome(homeCurrentQuery,true);
+},{passive:true});
+document.addEventListener("fullscreenchange",()=>playerRotateBtn.textContent=document.fullscreenElement===fullFrameHost?"↙":"⛶");
+document.addEventListener("webkitfullscreenchange",()=>playerRotateBtn.textContent=document.webkitFullscreenElement===fullFrameHost?"↙":"⛶");
+document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible"&&playbackActive)requestWakeLock()});
+
+history.replaceState({jawra:true,view:"home"},"",location.pathname+location.search);
+history.pushState({jawra:true,view:"home"},"","#home");
+window.addEventListener("popstate",()=>{handleAppBack();try{history.pushState({jawra:true,view:historyState},"","#"+historyState+"-"+Date.now())}catch(e){}});
+
+const swipeHandle=$("swipeDownHandle");
+if(swipeHandle){
+swipeHandle.addEventListener("touchstart",e=>{const t=e.touches[0];swipeStartY=t.clientY;swipeStartX=t.clientX;swipeTracking=true},{passive:true});
+swipeHandle.addEventListener("touchend",e=>{if(!swipeTracking)return;swipeTracking=false;const t=e.changedTouches[0],dy=t.clientY-swipeStartY,dx=Math.abs(t.clientX-swipeStartX);if(dy>45&&dy>dx&&currentVideoId)enterMiniMode()},{passive:true});
+swipeHandle.addEventListener("pointerdown",e=>{swipeStartY=e.clientY;swipeStartX=e.clientX;swipeTracking=true});
+swipeHandle.addEventListener("pointerup",e=>{if(!swipeTracking)return;swipeTracking=false;const dy=e.clientY-swipeStartY,dx=Math.abs(e.clientX-swipeStartX);if(dy>45&&dy>dx&&currentVideoId)enterMiniMode()});
+}
+let lastTouchEnd=0;
+document.addEventListener("touchend",e=>{const now=Date.now();if(now-lastTouchEnd<=300)e.preventDefault();lastTouchEnd=now},{passive:false});
+document.addEventListener("touchmove",e=>{if(e.touches&&e.touches.length>1)e.preventDefault()},{passive:false});
+
+setTimeout(()=>$("splash").style.display="none",3000);
+if(hasApiKey())searchHome("trending music",false);
+else{
+homeResults.innerHTML='<div class="error">YouTube API Key বসানো হয়নি।<br><br>কোডের শুরুতে <b>YOUR_YOUTUBE_API_KEY_HERE</b> জায়গায় নিজের API Key বসাও।</div>';
+homeLoader.textContent="";
+}
+</script><script>
+
+f("service Worker" in navigator) {
+
+window.addEventListener("load", function(){ navigator.serviceWorker.register("./sw.js");
+
+});
+</body>
+</html>
